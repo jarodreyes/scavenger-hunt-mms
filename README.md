@@ -1,1 +1,1 @@
-SMS assassin-style game.
+MMS based Scavenger hunt using Sinatra and Twilio MMS.

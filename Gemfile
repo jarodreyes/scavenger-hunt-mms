@@ -12,6 +12,8 @@ gem "rotp"
 gem "data_mapper"
 gem 'newrelic_rpm'
 
+gem "shotgun"
+
 # group :development do
 #   gem 'sqlite3'
 #   gem "dm-sqlite-adapter"

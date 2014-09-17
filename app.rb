@@ -39,8 +39,6 @@ DataMapper.auto_upgrade!
 before do
   @ronin_number = ENV['RONIN_NUMBER']
   @client = Twilio::REST::Client.new ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN']
-  @mmsclient = @client.accounts.get(ENV['TWILIO_SID'])
-
   if params[:error].nil?
     @error = false
   else
@@ -49,7 +47,7 @@ before do
 
 end
 
-_INJUREDWORDS = ['farted on by a deadly fart beetle', 'eaten by a hippopotamus', 'rubbed with poison ivy', 'stuck by a cactus', 'licked by a cat with thirty hepatitis tongues', 'kissed by a girl with dandruff', 'swallowed by a sink hole', 'kidnapped by jungle rebels with nerf guns', 'attacked by Jacobs dirty laundry', 'attacked by Brendans dirty laundry', 'attacked by Simons dirty laundry', 'beaten by a blind and deaf troll', 'turned into a gnewt', 'hit with a flying gerbil', 'ran over by a deer driving a minivan', 'cast in the next star wars as a dead Gornt']
+_INJUREDWORDS = ['farted on by a deadly fart beetle', 'eaten by a hippopotamus', 'rubbed with poison ivy', 'stuck by a cactus', 'licked by a cat with thirty hepatitis tongues', 'kissed by a girl with dandruff', 'swallowed by a sink hole', 'kidnapped by jungle rebels with nerf guns', 'beaten by a blind and deaf troll', 'turned into a gnewt', 'hit with a flying gerbil', 'ran over by a deer driving a minivan', 'cast in the next star wars as a dead Gornt']
 
 set :static, true
 
@@ -153,7 +151,7 @@ get '/scavenger/?' do
 
     # Setup the player details
     when :new
-      output = "Welcome to the Soliday house scavenger hunt. First what is your super awesome nickname?"
+      output = "Welcome to the Twilio MMS scavenger hunt. First what is your super awesome nickname?"
       @user.update(:status => 'naming')
 
     # Get User Name
@@ -164,7 +162,8 @@ get '/scavenger/?' do
         output = "We have your nickname as #{@body}. Is this correct? [yes] or [no]?"
       else
         if @body == 'yes'
-          output = "Ok #{@user.name}, time to go find your first clue! You should receive a picture of it shortly. Once you find the object send back the word clue to THIS number. DO NOT send the word clue to the number that sent the picture or you will be injured."
+          puts "RECEIVED MESSAGE of YES"
+          output = "Ok #{@user.name}, time to go find your first clue! You should receive a picture of it shortly. Once you find the object send back the word clue to this number."
           @user.update(:status => 'hunting')
           sendNextClue(@user)
         else
@@ -194,13 +193,7 @@ get '/scavenger/?' do
           remaining = @user.remaining
           clue = $CLUES[current]
 
-          puts "%%%%%%%%%%%% REMAINING CLUES %%%%%%%%%%%%%%%%%%"
-          puts remaining, clue
-
           remaining = remaining.split(',')
-
-          puts "%%%%%%%%%%%% REMAINING CLUES %%%%%%%%%%%%%%%%%%"
-          puts remaining
 
           if @body == clue['keyword']
             # Score this point
@@ -215,14 +208,10 @@ get '/scavenger/?' do
                 @user.update(:fastest => completed_time)
               end
             end
-            puts "%%%%%%%%%%%% FASTEST TIME %%%%%%%%%%%%%%%%%%"
-            puts @user.fastest
-
 
             # Remove the clue that was just completed
             remaining.delete(current)
-            puts "%%%%%%%%%%%% REMAINING CLUES %%%%%%%%%%%%%%%%%%"
-            puts remaining
+
             # UPDATE THE USER
             @user.update(:complete => complete, :remaining => remaining.join(','), :time_complete => currentTime)
             if remaining.length == 0
@@ -251,7 +240,7 @@ get '/scavenger/?' do
   end
 
   if params['SmsSid'] == nil
-    erb :index, :locals => {:msg => output}
+    return nil
   else
     response = Twilio::TwiML::Response.new do |r|
       r.Sms output
@@ -262,15 +251,11 @@ end
 
 def sendNextClue(user)
   remaining = user.remaining
-
-  puts "%%%%%%%%%%%% REMAINING CLUES %%%%%%%%%%%%%%%%%%"
-  puts remaining
   remaining = remaining.split(',')
+
   l = remaining.length
   next_clue = remaining[rand(l)]
 
-  puts "%%%%%%%%%%%% NEXT CLUE %%%%%%%%%%%%%%%%%%"
-  puts next_clue
   clue = $CLUES[next_clue]
   puts $CLUES
 
@@ -290,23 +275,9 @@ def getRandomStep()
   return status
 end
 
-def createCode()
-  hex = ('a'..'z').to_a.shuffle[0,4].join
-  return hex
-end
-
-def sendMessage(from, to, body)
-  message = @client.account.messages.create(
-    :from => from,
-    :to => to,
-    :body => body
-  )
-  puts message.to
-end
-
 def sendPicture(to, msg, media)
-  message = @mmsclient.messages.create(
-    :from => 'TWILIO',
+  message = @client.account.messages.create(
+    :from => ENV['RONIN_NUMBER'],
     :to => @phone_number,
     :body => msg,
     :media_url => media,
