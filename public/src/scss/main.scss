@@ -1,0 +1,97 @@
+// Normalize non-controls
+//
+// Restyle and baseline non-control form elements.
+
+body {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size:22px;
+  line-height:24px;
+  background-image:url('/img/bg.gif');
+  position: absolute;
+  min-height: 100%;
+  width: 100%;
+}
+
+.logo {
+  text-align:center;
+  display: block;
+  background: url('/img/logo.png') center -90px no-repeat;
+  height: 240px;
+}
+
+.button.large {  
+  background-color:#5DA3A6;
+  padding:22px 0px;
+  margin-top:20px;
+}
+
+.testing {
+  text-align: right;
+}
+.panel {
+  background:rgba(255,255,255,0.3);
+}
+.panel.twilions {
+  text-align: center;
+  h2 {
+    font-family: 'Josefin Sans', sans-serif;
+  }
+}
+
+.hidden {
+  display:none;
+}
+input.code {
+  width:80%;
+}
+.verifyCode {
+  position: relative;
+  .button {
+    display: inline-block;
+    width: 240px;
+    font-size: 17px;
+    vertical-align: top;
+    height: 57px;
+    padding: 20px;
+  }
+  input {
+    width: 260px;
+    display: inline-block;
+  }
+  .alert-box.success {
+    position: absolute;
+    top: 0px;
+    width: 100%;
+  }
+}
+.logo {
+  color: #C1E3E5;
+  font-weight: 100;
+  font-size: 29px;
+  padding-top: 200px;
+}
+
+.menu {
+  position:absolute;
+  right:20px;
+  top:20px;
+  a {
+    display:block;
+    width:50px;
+    height:50px;
+    margin:2px;
+    background-repeat:no-repeat;
+  }
+  a.twilions {
+    background-image:url('/img/twilions.png');
+  }
+  a.users {
+    background-image:url('/img/users.png');
+  }
+  a.gotime {
+    background-image:url('/img/gotime.png');
+  }
+  a.kindthings {
+    background-image:url('/img/kindthings.png');
+  }
+}

@@ -1,0 +1,20 @@
+.row
+  .small-12.large-6.small-centered.columns
+    - @users.each do |user|
+      .duido
+        %span= user.phone_number 
+        %span= user.name
+        %span= user.code
+        %span= user.status
+        %span= user.shirt
+        %span= user.shoes
+        %span= user.watch
+        %span= user.glasses
+        %span= user.targets
+        %span= user.wins
+        %span= user.losses
+        %span= user.injured
+
+
+
+%script{:type => "text/javascript", :src  => "/js/notify.js"}
