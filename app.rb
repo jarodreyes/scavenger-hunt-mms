@@ -300,8 +300,7 @@ get "/" do
   haml :index
 end
 
-get '/users/' do
+get '/users/?' do
   @users = VerifiedUser.all
-  puts @users
   haml :users
 end
