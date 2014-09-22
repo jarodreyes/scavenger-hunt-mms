@@ -4,11 +4,10 @@ require "data_mapper"
 require "twilio-ruby"
 require "sanitize"
 require "haml"
-include ERB::Util
 
 # Using DataMapper for our psql data manager
 DataMapper::Logger.new(STDOUT, :debug)
-DataMapper::setup(:default, ENV['DATABASE_URL'] || 'postgres://localhost/jreyes')
+DataMapper::setup(:default, ENV['DATABASE_URL'] || 'postgres://localhost/scavenge')
 
 class Player
   include DataMapper::Resource
