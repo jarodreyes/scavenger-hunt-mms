@@ -15,7 +15,7 @@ include ERB::Util
 DataMapper::Logger.new(STDOUT, :debug)
 DataMapper::setup(:default, ENV['DATABASE_URL'] || 'postgres://localhost/jreyes')
 
-class VerifiedUser
+class Player
   include DataMapper::Resource
 
   property :id, Serial
@@ -23,12 +23,9 @@ class VerifiedUser
   property :name, String
   property :current, String
   property :status, Enum[ :new, :naming, :playing, :hunting, :clue1, :clue2, :clue3, :clue4, :clue5, :clue6, :clue7, :clue8, :clue9, :clue10, :clue11, :clue12, :clue13, :injured], :default => :new
-  property :fastest, Float
-  property :time_complete, Time, :default => Time.now
   property :missed, Integer, :default => 0
   property :complete, Integer, :default => 0
   property :remaining, Object
-  property :injured, Time, :default => Time.now
 
 end
 
@@ -47,85 +44,83 @@ before do
 
 end
 
-_INJUREDWORDS = ['farted on by a deadly fart beetle', 'eaten by a hippopotamus', 'rubbed with poison ivy', 'stuck by a cactus', 'licked by a cat with thirty hepatitis tongues', 'kissed by a girl with dandruff', 'swallowed by a sink hole', 'kidnapped by jungle rebels with nerf guns', 'beaten by a blind and deaf troll', 'turned into a gnewt', 'hit with a flying gerbil', 'ran over by a deer driving a minivan', 'cast in the next star wars as a dead Gornt']
-
 set :static, true
 
 $CLUES = {
   "clue1" => {
     "keyword" => 'boygeorge',
     "title" => 'Humdinger of a clue',
-    "url" => 'http://jreyes.ngrok.com/img/clue01.jpg'
+    "url" => 'https://dl.dropboxusercontent.com/u/123971/scavenger-hunt/clue01.jpg'
   },
   "clue2" => {
     "keyword" => 'scumbucket',
     "title" => 'Let this clue float in your head for a bit.',
-    "url" => 'http://jreyes.ngrok.com/img/clue02.jpg'
+    "url" => 'https://dl.dropboxusercontent.com/u/123971/scavenger-hunt/clue02.jpg'
   },
   "clue3" => {
     "keyword" => 'billieidol',
     "title" => 'Wood you be my neighbor?',
-    "url" => 'http://jreyes.ngrok.com/img/clue03.jpg'
+    "url" => 'https://dl.dropboxusercontent.com/u/123971/scavenger-hunt/clue03.jpg'
   },
   "clue4" => {
     "keyword" => 'erasure',
     "title" => 'Time to hunt!',
-    "url" => 'http://jreyes.ngrok.com/img/clue04.jpg'
+    "url" => 'https://dl.dropboxusercontent.com/u/123971/scavenger-hunt/clue04.jpg'
   },
   "clue5" => {
     "keyword" => 'blondie',
     "title" => 'Can you handle this?',
-    "url" => 'http://jreyes.ngrok.com/img/clue05.jpg'
+    "url" => 'https://dl.dropboxusercontent.com/u/123971/scavenger-hunt/clue05.jpg'
   },
   "clue6" => {
     "keyword" => 'cinderella',
     "title" => 'Your days are numbered...',
-    "url" => 'http://jreyes.ngrok.com/img/clue06.jpg'
+    "url" => 'https://dl.dropboxusercontent.com/u/123971/scavenger-hunt/clue06.jpg'
   },
   "clue7" => {
     "keyword" => 'joejackson',
     "title" => 'Your inability to find these clues is grating on me.',
-    "url" => 'http://jreyes.ngrok.com/img/clue07.jpg'
+    "url" => 'https://dl.dropboxusercontent.com/u/123971/scavenger-hunt/clue07.jpg'
   },
   "clue8" => {
     "keyword" => 'onedirection',
     "title" => 'Your progress is a bad sign.',
-    "url" => 'http://jreyes.ngrok.com/img/clue08.jpg'
+    "url" => 'https://dl.dropboxusercontent.com/u/123971/scavenger-hunt/clue08.jpg'
   },
   "clue9" => {
     "keyword" => 'wildfire',
     "title" => 'Wash away your fears',
-    "url" => 'http://jreyes.ngrok.com/img/clue09.jpg'
+    "url" => 'https://dl.dropboxusercontent.com/u/123971/scavenger-hunt/clue09.jpg'
   },
   "clue10" => {
     "keyword" => 'slowmo',
     "title" => 'Are you getting tired of this?',
-    "url" => 'http://jreyes.ngrok.com/img/clue10.jpg'
+    "url" => 'https://dl.dropboxusercontent.com/u/123971/scavenger-hunt/clue10.jpg'
   },
   "clue11" => {
     "keyword" => 'dummy',
     "title" => 'The wicked clue is dead?',
-    "url" => 'http://jreyes.ngrok.com/img/clue11.jpg'
+    "url" => 'https://dl.dropboxusercontent.com/u/123971/scavenger-hunt/clue11.jpg'
   },
   "clue12" => {
     "keyword" => 'fakeplastic',
     "title" => 'Rock on dude!',
-    "url" => 'http://jreyes.ngrok.com/img/clue12.jpg'
+    "url" => 'https://dl.dropboxusercontent.com/u/123971/scavenger-hunt/clue12.jpg'
   },
   "clue13" => {
     "keyword" => 'menatwork',
     "title" => 'Keep looking!',
-    "url" => 'http://jreyes.ngrok.com/img/clue13.jpg'
+    "url" => 'https://dl.dropboxusercontent.com/u/123971/scavenger-hunt/clue13.jpg'
   },
   "clue14" => {
     "keyword" => 'duran',
     "title" => 'Dont lean on your senses.',
-    "url" => 'http://jreyes.ngrok.com/img/clue14.jpg'
+    "url" => 'https://dl.dropboxusercontent.com/u/123971/scavenger-hunt/clue14.jpg'
   },
   "clue15" => {
     "keyword" => 'jazzyjeff',
     "title" => 'Let cooler heads prevail.',
-    "url" => 'http://jreyes.ngrok.com/img/clue15.jpg'
+    "url" => 'https://dl.dropboxusercontent.com/u/123971/scavenger-hunt/clue15.jpg'
   },
 }
 
@@ -134,109 +129,93 @@ get '/scavenger/?' do
   @phone_number = Sanitize.clean(params[:From])
   @body = params[:Body].downcase
 
-  # Find the user associated with this number if there is one
-  @user = VerifiedUser.first(:phone_number => @phone_number)
+  # Find the player associated with this number if there is one
+  @player = Player.first(:phone_number => @phone_number)
 
   # if the user doesn't exist create a new user.
-  if @user.nil?
-    # for the time being we create the code at the start of the game
-    # TODO - Instead of creating user with code, allow user to submit their code to the listener as first step of signup. Then we assign code to user at the Real-world Event. That way we can hand out stickers, badges, with the code pre-written. 
-    @user = createUser(@phone_number)
+  if @player.nil?
+    @player = createUser(@phone_number)
   end
 
   begin
     # this is our main game trigger, depending on users status in the game, respond appropriately
-    status = @user.status
+    status = @player.status
+
+    # switch based on 'where' in the game the user is.
     case status
 
     # Setup the player details
     when :new
       output = "Welcome to the Twilio MMS scavenger hunt. First what is your super awesome nickname?"
-      @user.update(:status => 'naming')
+      @player.update(:status => 'naming')
 
-    # Get User Name
+    # Get Player NickName
     when :naming
-      if @user.name.nil?
-        @user.name = @body
-        @user.save
+      if @player.name.nil?
+        @player.name = @body
+        @player.save
         output = "We have your nickname as #{@body}. Is this correct? [yes] or [no]?"
       else
         if @body == 'yes'
           puts "RECEIVED MESSAGE of YES"
-          output = "Ok #{@user.name}, time to go find your first clue! You should receive a picture of it shortly. Once you find the object send back the word clue to this number."
-          @user.update(:status => 'hunting')
-          sendNextClue(@user)
+          output = "Ok #{@player.name}, time to go find your first clue! You should receive a picture of it shortly. Once you find the object send back the word clue to this number."
+          @player.update(:status => 'hunting')
+          sendNextClue(@player)
         else
           output = "Okay safari dude. What is your nickname then?"
-          @user.update(:name => nil)
+          @player.update(:name => nil)
         end
       end
 
-    when :playing
-        currentTime = Time.now
-        if @user.injured > currentTime
-          output = "Looks like you are still injured. Come back once you've healed."
-        else
-          output = "Hiddey Ho #{@user.name}, you look a little messed up from your injury, you should probably get that checked out. Anyway, here is the next picture clue!"
-          @user.update(:status => 'hunting')
-          sendNextClue(@user)
-        end
-
     # When the user is hunting
     when :hunting
-        currentTime = Time.now
-        if @user.injured > currentTime
-          output = "Looks like you are still injured. Come back once you've healed."
+      currentTime = Time.now
+      # check what the current clue is
+      current = @player.current
+      clue = $CLUES[current]
+
+      # Turn the remaining object into a proper array, to remove
+      # the correct clue from it later.
+      remaining = (@player.remaining).split(',')
+
+      if @body == clue['keyword']
+
+        # Score this point
+        complete = @player.complete++
+
+        # Remove the clue that was just completed
+        remaining.delete(current)
+
+        # UPDATE THE USER
+        @player.update(:complete => complete, :remaining => remaining.join(','))
+
+        if remaining.length == 0
+          output = "Congratulations #{@player.name}! You've finished the game and found #{@player.complete} clues! Your fastest time was #{@minutes}, which is pretty good! Now just wait for the others to finish and a special rewards ceremony."
         else
-          # check the attacker isn't injured
-          current = @user.current
-          remaining = @user.remaining
-          clue = $CLUES[current]
-
-          remaining = remaining.split(',')
-
-          if @body == clue['keyword']
-            # Score this point
-            complete = @user.complete + 1
-
-            # Check time and set fastest
-            completed_time = time_diff(@user.time_complete, currentTime)
-            if @user.fastest.nil?  
-              @user.update(:fastest => completed_time)
-            else
-              if completed_time < @user.fastest
-                @user.update(:fastest => completed_time)
-              end
-            end
-
-            # Remove the clue that was just completed
-            remaining.delete(current)
-
-            # UPDATE THE USER
-            @user.update(:complete => complete, :remaining => remaining.join(','), :time_complete => currentTime)
-            if remaining.length == 0
-              minutes = @user.fastest / 60
-              output = "Congratulations #{@user.name}! You've finished the game and found #{@user.complete} clues! Your fastest time was #{@minutes}, which is pretty good! Now just wait for the others to finish and a special rewards ceremony."
-            else
-              output = "Well done #{@user.name}! You've just found a treasure! Now here's the next clue!"
-              
-              # Get next clue and send it.
-              sendNextClue(@user)
-            end
-
-          else
-            missed = @user.missed
-            missed = missed + 1
-            a = rand(0.._INJUREDWORDS.length)
-            injuredStr = _INJUREDWORDS[a]
-            output = "Oh no #{@user.name}! You were just #{injuredStr}! That means you can not submit another clue for 1 minute. PRO TIP: Don't just submit the first clue you find. Look around the area to find a clue that is hidden better."
-            injuredTime = Time.now + 1*60
-            @user.update(:status => 'playing', :injured => injuredTime, :missed => missed)
-          end
+          output = "Well done #{@player.name}! You've just found a treasure! Now here's the next clue!"
+          
+          # Get next clue and send it.
+          sendNextClue(@player)
         end
+
+      else
+        # Player missed one, increment
+        missed = @player.missed++
+        @player.update(:missed => missed)
+
+        output = "That's not completely right (in fact it's wrong). Here's another clue, see if you can find it."
+
+        # Get next clue and send it.
+        sendNextClue(@player)
+      end
     end
   rescue
-    output = "there was a user.status error."
+    output = "Hold on, something happened. We'll be right with you."
+    message = @client.account.messages.create(
+      :from => ENV['RONIN_NUMBER'],
+      :to => ENV['PERSONAL_PHONE'],
+      :body => "Something went wrong with the scavenger hunt app. Check the logs and figure out what happened. The user who hit the error was #{@player.name} at #{@player.phone_number}."
+    )
   end
 
   if params['SmsSid'] == nil
@@ -261,18 +240,7 @@ def sendNextClue(user)
 
   sendPicture(@phone_number, clue['title'], clue['url'])
 
-  @user.update(:current => next_clue)
-end
-
-def time_diff(start_time, end_time)
-  seconds = (start_time - end_time).to_i.abs
-  return seconds
-end
-
-def getRandomStep()
-  num = rand(12)
-  status = "clue#{num}"
-  return status
+  @player.update(:current => next_clue)
 end
 
 def sendPicture(to, msg, media)
@@ -286,9 +254,8 @@ def sendPicture(to, msg, media)
 end
 
 def createUser(phone_number)
-  @AVAILABLE_CLUES = ["clue1", "clue2", "clue3", "clue4", "clue5", "clue6", "clue7", "clue8", "clue9", "clue10", "clue11", "clue12", "clue13", "clue14", "clue15"]
-  clues = @AVAILABLE_CLUES.join(',')
-  user = VerifiedUser.create(
+  clues = ($CLUES.keys).join(',')
+  user = Player.create(
     :phone_number => phone_number,
     :remaining => clues,
   )
@@ -301,6 +268,6 @@ get "/" do
 end
 
 get '/users/?' do
-  @users = VerifiedUser.all
+  @players = Player.all
   haml :users
 end
