@@ -212,7 +212,8 @@ get '/scavenger/?' do
   rescue
     output = "Hold on, something happened. We'll try to fix this right away."
 
-    # 
+    # Send a text to the game runner to check-in on the app. Something broke
+    # this main function.
     message = @client.account.messages.create(
       :from => ENV['RONIN_NUMBER'],
       :to => ENV['PERSONAL_PHONE'],
