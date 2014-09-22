@@ -157,7 +157,7 @@ get '/scavenger/?' do
         output = "We have your nickname as #{@body}. Is this correct? [yes] or [no]?"
       else
         if @body == 'yes'
-          puts "RECEIVED MESSAGE of YES"
+          puts "Sending #{@player.name} a clue."
           output = "Ok #{@player.name}, time to go find your first clue! You should receive a picture of it shortly. Once you find the object send back the word clue to this number."
           @player.update(:status => 'hunting')
           sendNextClue(@player)
@@ -239,7 +239,6 @@ def sendNextClue(user)
   next_clue = remaining[rand(l)]
 
   clue = $CLUES[next_clue]
-  puts $CLUES
 
   sendPicture(@phone_number, clue['title'], clue['url'])
 
