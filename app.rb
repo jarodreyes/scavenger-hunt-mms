@@ -1,14 +1,9 @@
 require "bundler/setup"
 require "sinatra"
-require "sinatra/multi_route"
 require "data_mapper"
 require "twilio-ruby"
-require 'twilio-ruby/rest/messages'
 require "sanitize"
-require "erb"
-require "rotp"
 require "haml"
-require "pry"
 include ERB::Util
 
 # Using DataMapper for our psql data manager
@@ -22,7 +17,7 @@ class Player
   property :phone_number, String, :length => 30, :required => true
   property :name, String
   property :current, String
-  property :status, Enum[ :new, :naming, :playing, :hunting, :clue1, :clue2, :clue3, :clue4, :clue5, :clue6, :clue7, :clue8, :clue9, :clue10, :clue11, :clue12, :clue13, :injured], :default => :new
+  property :status, Enum[ :new, :naming, :hunting], :default => :new
   property :missed, Integer, :default => 0
   property :complete, Integer, :default => 0
   property :remaining, Object
