@@ -210,7 +210,9 @@ get '/scavenger/?' do
       end
     end
   rescue
-    output = "Hold on, something happened. We'll be right with you."
+    output = "Hold on, something happened. We'll try to fix this right away."
+
+    # 
     message = @client.account.messages.create(
       :from => ENV['RONIN_NUMBER'],
       :to => ENV['PERSONAL_PHONE'],
