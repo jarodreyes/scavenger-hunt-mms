@@ -15,7 +15,7 @@ include ERB::Util
 DataMapper::Logger.new(STDOUT, :debug)
 DataMapper::setup(:default, ENV['DATABASE_URL'] || 'postgres://localhost/jreyes')
 
-class VerifiedUser
+class Player
   include DataMapper::Resource
 
   property :id, Serial
@@ -135,77 +135,77 @@ get '/scavenger/?' do
   @body = params[:Body].downcase
 
   # Find the user associated with this number if there is one
-  @user = VerifiedUser.first(:phone_number => @phone_number)
+  @player = Player.first(:phone_number => @phone_number)
 
   # if the user doesn't exist create a new user.
-  if @user.nil?
+  if @player.nil?
     # for the time being we create the code at the start of the game
     # TODO - Instead of creating user with code, allow user to submit their code to the listener as first step of signup. Then we assign code to user at the Real-world Event. That way we can hand out stickers, badges, with the code pre-written. 
-    @user = createUser(@phone_number)
+    @player = createUser(@phone_number)
   end
 
   begin
     # this is our main game trigger, depending on users status in the game, respond appropriately
-    status = @user.status
+    status = @player.status
     case status
 
     # Setup the player details
     when :new
       output = "Welcome to the Twilio MMS scavenger hunt. First what is your super awesome nickname?"
-      @user.update(:status => 'naming')
+      @player.update(:status => 'naming')
 
     # Get User Name
     when :naming
-      if @user.name.nil?
-        @user.name = @body
-        @user.save
+      if @player.name.nil?
+        @player.name = @body
+        @player.save
         output = "We have your nickname as #{@body}. Is this correct? [yes] or [no]?"
       else
         if @body == 'yes'
           puts "RECEIVED MESSAGE of YES"
-          output = "Ok #{@user.name}, time to go find your first clue! You should receive a picture of it shortly. Once you find the object send back the word clue to this number."
-          @user.update(:status => 'hunting')
-          sendNextClue(@user)
+          output = "Ok #{@player.name}, time to go find your first clue! You should receive a picture of it shortly. Once you find the object send back the word clue to this number."
+          @player.update(:status => 'hunting')
+          sendNextClue(@player)
         else
           output = "Okay safari dude. What is your nickname then?"
-          @user.update(:name => nil)
+          @player.update(:name => nil)
         end
       end
 
     when :playing
         currentTime = Time.now
-        if @user.injured > currentTime
+        if @player.injured > currentTime
           output = "Looks like you are still injured. Come back once you've healed."
         else
-          output = "Hiddey Ho #{@user.name}, you look a little messed up from your injury, you should probably get that checked out. Anyway, here is the next picture clue!"
-          @user.update(:status => 'hunting')
-          sendNextClue(@user)
+          output = "Hiddey Ho #{@player.name}, you look a little messed up from your injury, you should probably get that checked out. Anyway, here is the next picture clue!"
+          @player.update(:status => 'hunting')
+          sendNextClue(@player)
         end
 
     # When the user is hunting
     when :hunting
         currentTime = Time.now
-        if @user.injured > currentTime
+        if @player.injured > currentTime
           output = "Looks like you are still injured. Come back once you've healed."
         else
           # check the attacker isn't injured
-          current = @user.current
-          remaining = @user.remaining
+          current = @player.current
+          remaining = @player.remaining
           clue = $CLUES[current]
 
           remaining = remaining.split(',')
 
           if @body == clue['keyword']
             # Score this point
-            complete = @user.complete + 1
+            complete = @player.complete + 1
 
             # Check time and set fastest
-            completed_time = time_diff(@user.time_complete, currentTime)
-            if @user.fastest.nil?  
-              @user.update(:fastest => completed_time)
+            completed_time = time_diff(@player.time_complete, currentTime)
+            if @player.fastest.nil?  
+              @player.update(:fastest => completed_time)
             else
-              if completed_time < @user.fastest
-                @user.update(:fastest => completed_time)
+              if completed_time < @player.fastest
+                @player.update(:fastest => completed_time)
               end
             end
 
@@ -213,25 +213,25 @@ get '/scavenger/?' do
             remaining.delete(current)
 
             # UPDATE THE USER
-            @user.update(:complete => complete, :remaining => remaining.join(','), :time_complete => currentTime)
+            @player.update(:complete => complete, :remaining => remaining.join(','), :time_complete => currentTime)
             if remaining.length == 0
-              minutes = @user.fastest / 60
-              output = "Congratulations #{@user.name}! You've finished the game and found #{@user.complete} clues! Your fastest time was #{@minutes}, which is pretty good! Now just wait for the others to finish and a special rewards ceremony."
+              minutes = @player.fastest / 60
+              output = "Congratulations #{@player.name}! You've finished the game and found #{@player.complete} clues! Your fastest time was #{@minutes}, which is pretty good! Now just wait for the others to finish and a special rewards ceremony."
             else
-              output = "Well done #{@user.name}! You've just found a treasure! Now here's the next clue!"
+              output = "Well done #{@player.name}! You've just found a treasure! Now here's the next clue!"
               
               # Get next clue and send it.
-              sendNextClue(@user)
+              sendNextClue(@player)
             end
 
           else
-            missed = @user.missed
+            missed = @player.missed
             missed = missed + 1
             a = rand(0.._INJUREDWORDS.length)
             injuredStr = _INJUREDWORDS[a]
-            output = "Oh no #{@user.name}! You were just #{injuredStr}! That means you can not submit another clue for 1 minute. PRO TIP: Don't just submit the first clue you find. Look around the area to find a clue that is hidden better."
+            output = "Oh no #{@player.name}! You were just #{injuredStr}! That means you can not submit another clue for 1 minute. PRO TIP: Don't just submit the first clue you find. Look around the area to find a clue that is hidden better."
             injuredTime = Time.now + 1*60
-            @user.update(:status => 'playing', :injured => injuredTime, :missed => missed)
+            @player.update(:status => 'playing', :injured => injuredTime, :missed => missed)
           end
         end
     end
@@ -261,7 +261,7 @@ def sendNextClue(user)
 
   sendPicture(@phone_number, clue['title'], clue['url'])
 
-  @user.update(:current => next_clue)
+  @player.update(:current => next_clue)
 end
 
 def time_diff(start_time, end_time)
@@ -288,7 +288,7 @@ end
 def createUser(phone_number)
   @AVAILABLE_CLUES = ["clue1", "clue2", "clue3", "clue4", "clue5", "clue6", "clue7", "clue8", "clue9", "clue10", "clue11", "clue12", "clue13", "clue14", "clue15"]
   clues = @AVAILABLE_CLUES.join(',')
-  user = VerifiedUser.create(
+  user = Player.create(
     :phone_number => phone_number,
     :remaining => clues,
   )
@@ -301,6 +301,6 @@ get "/" do
 end
 
 get '/users/?' do
-  @users = VerifiedUser.all
+  @players = Player.all
   haml :users
 end
